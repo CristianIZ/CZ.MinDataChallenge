@@ -1,0 +1,36 @@
+<div class="login-container">
+    <div class="login-card">
+        <h1>Welcome</h1>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+            <!-- Email -->
+            <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Email</mat-label>
+                <input matInput type="email" formControlName="email" placeholder="Ex. pat@example.com"
+                    [errorStateMatcher]="emailMatcher" />
+                <mat-hint>example&#64;domain.com</mat-hint>
+                <mat-error *ngIf="hasAnyErrors(loginForm.controls['email'])">
+                    Please enter a valid email address
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Password -->
+            <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Password</mat-label>
+                <input matInput type="password" formControlName="password" [errorStateMatcher]="passwordMatcher" />
+                <mat-error *ngIf="
+              !loginForm.controls['password'].hasError('required') && hasAnyErrors(loginForm.controls['password'])">
+                    Please enter a valid Password
+                </mat-error>
+                <mat-error *ngIf="loginForm.controls['password'].hasError('required')">
+                    Password is <strong>required</strong>
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Botón de envío -->
+            <div class="example-button-row full-width" color="primary">
+                <button mat-flat-button [disabled]="!loginForm.valid" type="submit">Sign In</button>
+            </div>
+        </form>
+    </div>
+</div>
