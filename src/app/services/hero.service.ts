@@ -27,14 +27,73 @@ export class HeroService {
 
   constructor() { }
 
-  public getHeroes(page: number, pageSize: number): Observable<HeroModel[]> {
+  public addHero(newHero: HeroModel): Observable<HeroModel> {
+    let newId;
+
+    if (this.heroesInMemoryArray.length > 0) {
+      newId = Math.max(...this.heroesInMemoryArray.map(hero => hero.id)) + 1;
+    }
+    else {
+      newId = 1;
+    }
+
+    newHero.id = newId;
+    this.heroesInMemoryArray.push(newHero);
+    return of(newHero);
+  }
+
+  public getHeroes(filterValue: string, page: number, pageSize: number): Observable<HeroModel[]> {
+    let filteredValues = this.heroesInMemoryArray.filter(h => h.name.toString().includes(filterValue)) ?? [];
+
     const startIndex = (page - 1) * pageSize;
-    const heroesPage = this.heroesInMemoryArray.slice(startIndex, startIndex + pageSize);
-    return of(heroesPage);
+    const paginatedResults = filteredValues.slice(startIndex, startIndex + pageSize);
+    return of(paginatedResults);
+  }
+
+  public getTotalHeroes(filterValue: string): Observable<number> {
+    let filteredValues = this.heroesInMemoryArray.filter(h =>
+      h.edad.toString().includes(filterValue) ||
+      h.name.toString().includes(filterValue) ||
+      h.origen.toString().includes(filterValue) ||
+      h.superpoder.toString().includes(filterValue)) ?? [];
+
+    return of(filteredValues.length);
   }
 
   public getHeroById(id: number): Observable<HeroModel | undefined> {
-    const hero = this.heroesInMemoryArray.find(h => h.id === id);
+    const hero = this.heroesInMemoryArray.find(h => h.id == id);
     return of(hero);
+  }
+
+  public updateHero(heroToEdit: HeroModel): Observable<void> {
+    debugger;
+    if (heroToEdit && heroToEdit.id) {
+      console.error("Id is required");
+      throw new Error("Id is required");
+    }
+
+    let currentHeroIndex = this.heroesInMemoryArray.findIndex(h => h.id == heroToEdit.id);
+
+    if (currentHeroIndex == -1) {
+      console.error("Invalid Id:");
+      throw new Error("Invalid Id");
+    }
+
+    this.heroesInMemoryArray.splice(currentHeroIndex, 1);
+    this.heroesInMemoryArray.push(heroToEdit);
+    return of(undefined);
+  }
+
+  public deleteHero(id: number): Observable<void> {
+    let index = this.heroesInMemoryArray.findIndex(hero => hero.id == id);
+
+    if (index == -1) {
+      console.error("Invalid Id:");
+      throw new Error("Invalid Id");
+    }
+
+    this.heroesInMemoryArray.splice(index, 1);
+
+    return of(undefined);
   }
 }

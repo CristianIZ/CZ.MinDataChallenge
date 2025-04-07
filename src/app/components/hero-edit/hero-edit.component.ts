@@ -1,32 +1,38 @@
-import { Component, } from '@angular/core';
+import { Component, inject, Inject, } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { HeroModel } from '../../models/hero.model';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { DialogAction } from '../../models/dialog-action.model';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-hero-edit',
-  imports: [MatFormFieldModule, MatDialogModule, ReactiveFormsModule, MatInputModule, MatButtonModule],
+  imports: [MatFormFieldModule, MatDialogModule, ReactiveFormsModule, MatInputModule, MatButtonModule, CommonModule],
+  providers: [HeroModel],
   templateUrl: './hero-edit.component.html',
   styleUrl: './hero-edit.component.css',
   standalone: true
 })
 export class HeroEditComponent {
   public editForm: FormGroup;
+  public viewMode: boolean = false;
+  readonly dialogRef = inject(MatDialogRef<HeroEditComponent>);
 
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<HeroEditComponent>,
-    public data: HeroModel
+    @Inject(MAT_DIALOG_DATA) public data: { hero: HeroModel, action: DialogAction }
   ) {
     this.editForm = this.fb.group({
-      name: [data.name, Validators.required],
-      superpoder: [data.superpoder, Validators.required],
-      edad: [data.edad, [Validators.required, Validators.min(0)]],
-      origen: [data.origen, Validators.required]
+      name: [data?.hero?.name ?? '', [Validators.required, Validators.minLength(3), Validators.maxLength(15)]],
+      superpoder: [data?.hero?.superpoder ?? '', [Validators.required, Validators.minLength(8)]],
+      edad: [data?.hero?.edad ?? '', [Validators.required, Validators.min(0)]],
+      origen: [data?.hero?.origen ?? '', Validators.required]
     });
+
+    this.viewMode = data.action == DialogAction.view;
   }
 
   public onSave(): void {
